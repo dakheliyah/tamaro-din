@@ -1,0 +1,181 @@
+{
+  "event_message": "POST | 400 | 112.134.214.25 | 94cee0134c665132 | https://bzinnenqdcjxoevbxkkh.supabase.co/auth/v1/token?grant_type=password | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+  "id": "eb1e8fb1-040f-4cb0-a1a0-95f1ee2242b4",
+  "metadata": [
+    {
+      "load_balancer_experimental_routing": null,
+      "load_balancer_geo_aware_info": [],
+      "load_balancer_redirect_identifier": null,
+      "logflare_worker": [
+        {
+          "worker_id": "JBE9H5"
+        }
+      ],
+      "request": [
+        {
+          "cf": [
+            {
+              "asOrganization": "ADSL - DYNAMIC POOL",
+              "asn": 9329,
+              "botManagement": [
+                {
+                  "corporateProxy": false,
+                  "detectionIds": [],
+                  "ja3Hash": "0aad9616eafd9548a6b9018b0180df4c",
+                  "jsDetection": [
+                    {
+                      "passed": false
+                    }
+                  ],
+                  "score": 99,
+                  "staticResource": false,
+                  "verifiedBot": false
+                }
+              ],
+              "city": "Dehiwala-Mount Lavinia",
+              "clientAcceptEncoding": "gzip, deflate, br, zstd",
+              "clientTcpRtt": null,
+              "clientTrustScore": 99,
+              "colo": "CMB",
+              "continent": "AS",
+              "country": "LK",
+              "edgeRequestKeepAliveStatus": 1,
+              "httpProtocol": "HTTP/3",
+              "isEUCountry": null,
+              "latitude": "6.84019",
+              "longitude": "79.87116",
+              "metroCode": null,
+              "postalCode": "10350",
+              "region": "Western Province",
+              "regionCode": "1",
+              "requestPriority": null,
+              "timezone": "Asia/Colombo",
+              "tlsCipher": "AEAD-AES128-GCM-SHA256",
+              "tlsClientAuth": [
+                {
+                  "certPresented": "0",
+                  "certRevoked": "0",
+                  "certVerified": "NONE"
+                }
+              ],
+              "tlsClientExtensionsSha1": "4O9xNoC5cg/pzzEiwZn4y1HQOlM=",
+              "tlsClientHelloLength": "1734",
+              "tlsClientRandom": "FLkJ32fjr0PGmzWjRPSQKUhQjEVWcmRG68LF4Icjcr4=",
+              "tlsExportedAuthenticator": [
+                {
+                  "clientFinished": "60dc832c20600548fe299529fc4e978e9b5bef27ee5c1ffabb715f1087bfca44",
+                  "clientHandshake": "2f096fca01c237fa0709d16e803e8ba346a6ad23b7166138be28919c073353d8",
+                  "serverFinished": "297d065d6b5f658538c3b204cf41ae3192096e5646dd569f20aaf3cce6486a53",
+                  "serverHandshake": "a898b97fb5ad8fdc78cf3b79a5b79e3f256e38ba09622fa4f55f84a66a286218"
+                }
+              ],
+              "tlsVersion": "TLSv1.3",
+              "verifiedBotCategory": null
+            }
+          ],
+          "headers": [
+            {
+              "accept": "*/*",
+              "cf_cache_status": null,
+              "cf_connecting_ip": "112.134.214.25",
+              "cf_ipcountry": "LK",
+              "cf_ray": "94cee0134c665132",
+              "content_length": "81",
+              "content_location": null,
+              "content_range": null,
+              "content_type": "application/json;charset=UTF-8",
+              "date": null,
+              "host": "bzinnenqdcjxoevbxkkh.supabase.co",
+              "prefer": null,
+              "range": null,
+              "referer": "http://localhost:3000/",
+              "sb_gateway_mode": null,
+              "sb_gateway_version": null,
+              "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+              "x_client_info": "supabase-js-web/2.50.0",
+              "x_forwarded_host": null,
+              "x_forwarded_proto": "https",
+              "x_forwarded_user_agent": null,
+              "x_kong_proxy_latency": null,
+              "x_kong_upstream_latency": null,
+              "x_real_ip": "112.134.214.25"
+            }
+          ],
+          "host": "bzinnenqdcjxoevbxkkh.supabase.co",
+          "method": "POST",
+          "path": "/auth/v1/token",
+          "port": null,
+          "protocol": "https:",
+          "sb": [
+            {
+              "apikey": [],
+              "auth_user": null,
+              "jwt": [
+                {
+                  "apikey": [
+                    {
+                      "invalid": null,
+                      "payload": [
+                        {
+                          "algorithm": "HS256",
+                          "expires_at": 2065027792,
+                          "issuer": "supabase",
+                          "role": "anon",
+                          "signature_prefix": "YLuhga",
+                          "subject": null
+                        }
+                      ]
+                    }
+                  ],
+                  "authorization": [
+                    {
+                      "invalid": null,
+                      "payload": [
+                        {
+                          "algorithm": "HS256",
+                          "expires_at": 2065027792,
+                          "issuer": "supabase",
+                          "key_id": null,
+                          "role": "anon",
+                          "session_id": null,
+                          "signature_prefix": "YLuhga",
+                          "subject": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "search": "?grant_type=password",
+          "url": "https://bzinnenqdcjxoevbxkkh.supabase.co/auth/v1/token?grant_type=password"
+        }
+      ],
+      "response": [
+        {
+          "headers": [
+            {
+              "cf_cache_status": "DYNAMIC",
+              "cf_ray": "94cee01381e15132-CMB",
+              "content_length": "68",
+              "content_location": null,
+              "content_range": null,
+              "content_type": "application/json",
+              "date": "Mon, 09 Jun 2025 07:21:59 GMT",
+              "sb_gateway_mode": null,
+              "sb_gateway_version": "1",
+              "transfer_encoding": null,
+              "x_kong_proxy_latency": null,
+              "x_kong_upstream_latency": null,
+              "x_sb_error_code": "invalid_credentials"
+            }
+          ],
+          "origin_time": 146,
+          "status_code": 400
+        }
+      ]
+    }
+  ],
+  "timestamp": 1749453719723000
+}

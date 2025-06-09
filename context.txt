@@ -1,0 +1,43 @@
+This app is a specialized email template builder, to create beautiful, professional emails for events. Using an intuitive drag-and-drop interface, users can combine customizable text and image blocks to craft responsive email templates, apply # @ themes, and export ready-to-send HTML with just one click. The app streamlines the entire process from design to delivery, making it easy for members to create engaging event communications without any technical expertise. 
+
+The features are as such:
+Template Builder
+
+Drag-and-drop block-based editor
+Mix and match text and image blocks
+Real-time visual editing
+Responsive mobile-first design
+
+Content Blocks
+
+Text blocks with rich formatting (bold, italic, underline, font size, alignment)
+Image blocks with upload or URL options
+Customizable block layouts and positioning
+Easy content editing within blocks
+
+Template Management
+
+Save and organize multiple templates
+Template library for easy access
+Duplicate existing templates
+Delete unwanted templates
+
+Theming System
+
+Multiple pre-built color schemes
+Custom font selection
+Theme assignment to specific Ashara events
+Easy theme switching for existing templates
+
+Asset Management
+
+Image upload and storage (with reasonable limits)
+Alternative URL-based image insertion
+Basic image management interface
+
+Preview & Export
+
+Live preview while editing
+Mobile responsiveness preview
+Email client preview simulation
+One-click HTML export for email sending
