@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, Save, Palette } from "lucide-react"
 import { toast } from "sonner"
+import { supabase, Project } from "@/lib/supabase"
 
 interface ProjectGlobalStyles {
   primaryColor: string
@@ -17,15 +18,6 @@ interface ProjectGlobalStyles {
   fontSize: string
   backgroundColor: string
   textColor: string
-}
-
-interface Project {
-  id: string
-  name: string
-  description: string
-  globalStyles: ProjectGlobalStyles
-  createdAt: string
-  updatedAt: string
 }
 
 export default function ProjectSettingsPage() {
@@ -37,7 +29,7 @@ export default function ProjectSettingsPage() {
   const [globalStyles, setGlobalStyles] = useState<ProjectGlobalStyles>({
     primaryColor: "#3b82f6",
     secondaryColor: "#64748b",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "Work Sans, sans-serif",
     fontSize: "16px",
     backgroundColor: "#ffffff",
     textColor: "#000000"
@@ -48,39 +40,69 @@ export default function ProjectSettingsPage() {
   const projectId = params.id as string
 
   useEffect(() => {
-    // Check if user is authenticated
-    const isAuthenticated = localStorage.getItem("isAuthenticated")
-    if (!isAuthenticated || isAuthenticated !== "true") {
-      router.push("/login")
-      return
-    }
+    checkAuthAndLoadProject()
+  }, [projectId])
 
-    loadProject()
-  }, [router, projectId])
-
-  const loadProject = () => {
+  const checkAuthAndLoadProject = async () => {
     try {
-      const savedProjects = localStorage.getItem("emailProjects")
-      if (savedProjects) {
-        const projects = JSON.parse(savedProjects)
-        const foundProject = projects.find((p: Project) => p.id === projectId)
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        router.push("/login")
+        return
+      }
+
+      await loadProject()
+    } catch (error) {
+      console.error("Auth check failed:", error)
+      router.push("/login")
+    }
+  }
+
+  const loadProject = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        router.push("/login")
+        return
+      }
+
+      const { data: project, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .eq('user_id', session.user.id)
+        .single()
+
+      if (error) {
+        console.error('Error loading project:', error)
+        toast.error('Project not found')
+        router.push('/projects')
+        return
+      }
+
+      if (project) {
+        setProject(project)
+        setProjectName(project.name)
+        setProjectDescription(project.description || "")
         
-        if (foundProject) {
-          setProject(foundProject)
-          setProjectName(foundProject.name)
-          setProjectDescription(foundProject.description || "")
-          setGlobalStyles(foundProject.globalStyles)
-        } else {
-          toast.error("Project not found")
-          router.push("/projects")
+        // Parse global_styles from database
+        if (project.global_styles) {
+          setGlobalStyles({
+            primaryColor: project.global_styles.primaryColor || "#3b82f6",
+            secondaryColor: project.global_styles.secondaryColor || "#64748b",
+            fontFamily: project.global_styles.fontFamily || "Work Sans, sans-serif",
+            fontSize: project.global_styles.fontSize || "16px",
+            backgroundColor: project.global_styles.backgroundColor || "#ffffff",
+            textColor: project.global_styles.textColor || "#000000"
+          })
         }
-      } else {
-        toast.error("No projects found")
-        router.push("/projects")
       }
     } catch (error) {
-      console.error("Error loading project:", error)
-      toast.error("Error loading project")
+      console.error('Error loading project:', error)
+      toast.error('Error loading project')
+      router.push('/projects')
     } finally {
       setIsLoading(false)
     }
@@ -95,27 +117,39 @@ export default function ProjectSettingsPage() {
     setIsSaving(true)
     
     try {
-      const savedProjects = JSON.parse(localStorage.getItem("emailProjects") || "[]")
-      const projectIndex = savedProjects.findIndex((p: Project) => p.id === projectId)
+      const { data: { session } } = await supabase.auth.getSession()
       
-      if (projectIndex !== -1) {
-        savedProjects[projectIndex] = {
-          ...savedProjects[projectIndex],
+      if (!session) {
+        router.push("/login")
+        return
+      }
+
+      const { data: updatedProject, error } = await supabase
+        .from('projects')
+        .update({
           name: projectName.trim(),
           description: projectDescription.trim(),
-          globalStyles,
-          updatedAt: new Date().toISOString()
-        }
-        
-        localStorage.setItem("emailProjects", JSON.stringify(savedProjects))
-        setProject(savedProjects[projectIndex])
-        toast.success("Project settings saved successfully!")
-      } else {
-        toast.error("Project not found")
+          global_styles: globalStyles,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', projectId)
+        .eq('user_id', session.user.id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error saving project:', error)
+        toast.error('Failed to save project settings')
+        return
+      }
+
+      if (updatedProject) {
+        setProject(updatedProject)
+        toast.success('Project settings saved successfully!')
       }
     } catch (error) {
-      console.error("Error saving project:", error)
-      toast.error("Failed to save project settings")
+      console.error('Error saving project:', error)
+      toast.error('Failed to save project settings')
     } finally {
       setIsSaving(false)
     }
@@ -126,6 +160,7 @@ export default function ProjectSettingsPage() {
   }
 
   const fontFamilyOptions = [
+    "Work Sans, sans-serif",
     "Arial, sans-serif",
     "Helvetica, sans-serif",
     "Georgia, serif",

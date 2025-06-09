@@ -34,7 +34,19 @@ export interface Template {
   id: string
   project_id: string
   name: string
-  components: any[]
+  components: EmailComponent[]
   created_at: string
   updated_at: string
+}
+
+export interface EmailComponent {
+  id: string
+  type: "text" | "image"
+  content: string
+  fontSize?: string
+  color?: string
+  textAlign?: string
+  width?: string
+  height?: string
+  order: number
 }

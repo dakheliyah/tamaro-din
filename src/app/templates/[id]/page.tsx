@@ -1,27 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, useParams, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Copy, Edit, Calendar, Layers } from "lucide-react"
 import { toast } from "sonner"
-import { supabase, Template, Project } from "@/lib/supabase"
+import { supabase, Template, Project, EmailComponent } from "@/lib/supabase"
 
-interface EmailComponent {
-  id: string
-  type: "text" | "image"
-  content: string
-  fontSize?: string
-  color?: string
-  textAlign?: string
-  width?: string
-  height?: string
-  order: number
-}
-
-export default function TemplateViewPage() {
+function TemplateViewContent() {
   const [template, setTemplate] = useState<Template | null>(null)
   const [project, setProject] = useState<Project | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -328,5 +316,13 @@ export default function TemplateViewPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function TemplateViewPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TemplateViewContent />
+    </Suspense>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,7 +9,7 @@ import { Eye, Edit, Trash2, Plus, ArrowLeft } from "lucide-react"
 import { supabase, Template, Project } from "@/lib/supabase"
 import { toast } from "sonner"
 
-export default function TemplatesPage() {
+function TemplatesContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const projectId = searchParams.get('project')
@@ -221,5 +221,13 @@ export default function TemplatesPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function TemplatesPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TemplatesContent />
+    </Suspense>
   )
 }

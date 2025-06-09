@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useState, useRef, useCallback, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,7 +27,7 @@ interface EmailComponent {
 
 
 
-export default function EditorPage() {
+function EditorContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [components, setComponents] = useState<EmailComponent[]>([])
@@ -592,5 +592,13 @@ export default function EditorPage() {
       </div>
       </div>
     </div>
+  )
+}
+
+export default function EditorPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EditorContent />
+    </Suspense>
   )
 }

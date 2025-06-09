@@ -241,7 +241,7 @@ export default function ProjectsPage() {
             </h1>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600 dark:text-gray-300">
-                Welcome back!
+                Welcome back <i>{user?.email}</i>
               </span>
               <Button variant="outline" onClick={handleLogout}>
                 Logout
