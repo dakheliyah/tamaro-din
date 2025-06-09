@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Plus, FolderOpen, Edit, Trash2, Palette } from "lucide-react"
+import { Plus, FolderOpen, Edit, Trash2, Palette, ArrowLeft, User } from "lucide-react"
 import { toast } from "sonner"
 import { supabase, Project as SupabaseProject } from '@/lib/supabase'
 
@@ -55,7 +55,7 @@ export default function ProjectsPage() {
       // Check if user is authenticated
       const isAuthenticated = localStorage.getItem("isAuthenticated")
       const userData = localStorage.getItem('userEmail')
-      
+
       if (!isAuthenticated || isAuthenticated !== "true" || !userData) {
         router.push("/login")
         return
@@ -63,7 +63,7 @@ export default function ProjectsPage() {
 
       // Get current user from Supabase
       const { data: { user: authUser }, error } = await supabase.auth.getUser()
-      
+
       if (error || !authUser) {
         console.error('Error getting user:', error)
         router.push("/login")
@@ -98,7 +98,7 @@ export default function ProjectsPage() {
           return { ...project, templateCount }
         })
       )
-      
+
       setProjects(projectsWithCounts)
     } catch (error) {
       console.error("Error loading projects:", error)
@@ -195,7 +195,7 @@ export default function ProjectsPage() {
           toast.error('Failed to delete project')
           return
         }
-        
+
         setProjects(prev => prev.filter(p => p.id !== projectId))
         toast.success("Project deleted successfully")
       } catch (error) {
@@ -233,16 +233,35 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Tamaro Din - Projects
-            </h1>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Welcome back <i>{user?.email}</i>
-              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/')}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+              <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                  <FolderOpen className="h-6 w-6 mr-2 text-blue-600" />
+                  Projects
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Manage your email template projects and their global styling
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+                <User className="h-4 w-4" />
+                <span>{user?.email}</span>
+              </div>
               <Button variant="outline" onClick={handleLogout}>
                 Logout
               </Button>
@@ -255,11 +274,8 @@ export default function ProjectsPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Projects</h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Manage your email template projects and their global styling
-            </p>
           </div>
-          
+
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center space-x-2">
@@ -347,39 +363,39 @@ export default function ProjectsPage() {
                     <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <Palette className="h-4 w-4" />
                       <span>Global Styles:</span>
-                      <div 
+                      <div
                         className="w-4 h-4 rounded border"
                         style={{ backgroundColor: project.global_styles.primaryColor }}
                       />
-                      <div 
+                      <div
                         className="w-4 h-4 rounded border"
                         style={{ backgroundColor: project.global_styles.secondaryColor }}
                       />
                     </div>
-                    
+
                     <div className="text-sm text-gray-600 dark:text-gray-400">
                       Created: {formatDate(project.created_at)}
                     </div>
-                    
+
                     <div className="flex space-x-2 pt-2">
-                      <Button 
-                        variant="default" 
-                        size="sm" 
+                      <Button
+                        variant="default"
+                        size="sm"
                         className="flex-1"
                         onClick={() => router.push(`/dashboard?project=${project.id}`)}
                       >
                         <FolderOpen className="h-4 w-4 mr-1" />
                         Open
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => router.push(`/projects/${project.id}/settings`)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => deleteProject(project.id)}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"

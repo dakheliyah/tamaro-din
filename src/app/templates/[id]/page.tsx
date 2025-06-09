@@ -105,6 +105,22 @@ function TemplateViewContent() {
       <img src="${component.content || 'https://via.placeholder.com/400x200'}" alt="Template Image" style="max-width: 100%; height: ${component.height || 'auto'}; border-radius: 4px;" />
     </div>
 `
+      } else if (component.type === "block" && component.blockData) {
+        // Render block content
+        html += `    <div style="margin-bottom: 16px; width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+      <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #6b7280;">${component.blockData.name}</h4>
+`
+        if (component.blockData.items && component.blockData.items.length > 0) {
+          component.blockData.items.forEach(item => {
+            if (item.type === 'text') {
+              html += `      <div style="margin-bottom: 8px; font-size: ${item.styles?.fontSize || '16px'}; color: ${item.styles?.color || '#000000'}; text-align: ${item.styles?.textAlign || 'left'};">${item.content}</div>\n`
+            } else if (item.type === 'image') {
+              html += `      <div style="margin-bottom: 8px; text-align: center;"><img src="${item.content}" alt="Block Image" style="max-width: 100%; height: auto; border-radius: 4px;" /></div>\n`
+            }
+          })
+        }
+        html += `    </div>
+`
       }
     })
     
@@ -292,7 +308,7 @@ function TemplateViewContent() {
                             >
                               {component.content || "Sample text"}
                             </div>
-                          ) : (
+                          ) : component.type === "image" ? (
                             <div className="w-full text-center">
                               <img
                                 src={component.content || "https://via.placeholder.com/400x200"}
@@ -304,7 +320,46 @@ function TemplateViewContent() {
                                 }}
                               />
                             </div>
-                          )}
+                          ) : component.type === "block" && component.blockData ? (
+                            <div className="w-full border border-gray-200 rounded-lg p-4 bg-gray-50">
+                              <div className="text-sm font-semibold text-gray-600 mb-3">
+                                🧩 {component.blockData.name}
+                              </div>
+                              {component.blockData.items && component.blockData.items.length > 0 ? (
+                                <div className="space-y-2">
+                                  {component.blockData.items.map((item, itemIndex) => (
+                                    <div key={itemIndex}>
+                                      {item.type === 'text' ? (
+                                        <div
+                                          style={{
+                                            fontSize: item.styles?.fontSize || "16px",
+                                            color: item.styles?.color || "#000000",
+                                            textAlign: (item.styles?.textAlign as any) || "left"
+                                          }}
+                                        >
+                                          {item.content}
+                                        </div>
+                                      ) : (
+                                        <div className="text-center">
+                                          <img
+                                            src={item.content}
+                                            alt="Block Image"
+                                            style={{
+                                              maxWidth: "100%",
+                                              height: "auto",
+                                              borderRadius: "4px"
+                                            }}
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-gray-500 text-sm">No content in this block</div>
+                              )}
+                            </div>
+                          ) : null}
                         </div>
                       ))}
                     </div>

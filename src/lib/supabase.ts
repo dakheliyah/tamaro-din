@@ -41,7 +41,7 @@ export interface Template {
 
 export interface EmailComponent {
   id: string
-  type: "text" | "image"
+  type: "text" | "image" | "block"
   content: string
   fontSize?: string
   color?: string
@@ -49,4 +49,49 @@ export interface EmailComponent {
   width?: string
   height?: string
   order: number
+  // Block-specific properties
+  blockId?: string
+  blockData?: Block & { items: BlockItem[] }
+  styles?: any
+}
+
+// Block Management Types
+export interface Block {
+  id: string
+  user_id: string
+  name: string
+  description: string
+  structure: {
+    rows: Array<{
+      columns: number
+      alignment: 'left' | 'center' | 'right'
+    }>
+  }
+  created_at: string
+  updated_at: string
+}
+
+export interface BlockItem {
+  id: string
+  block_id: string
+  row_index: number
+  column_index: number
+  type: 'text' | 'image'
+  content: string
+  styles: {
+    fontSize?: string
+    color?: string
+    textAlign?: 'left' | 'center' | 'right'
+    width?: string
+    height?: string
+    fontWeight?: string
+    fontFamily?: string
+    backgroundColor?: string
+    padding?: string
+    margin?: string
+    borderRadius?: string
+    border?: string
+  }
+  created_at: string
+  updated_at: string
 }

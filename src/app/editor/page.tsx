@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { Trash2, Move, Type, Image, Palette, Layout, Save, ArrowLeft } from "lucide-react"
+import { Trash2, Move, Type, Image, Palette, Layout, Save, ArrowLeft, Grid3X3 } from "lucide-react"
 import { supabase, Template, Project } from "@/lib/supabase"
+import { Block, BlockItem } from "@/lib/blocks"
+import { BlockSelector } from "@/components/blocks/BlockSelector"
+import { BlockPreview } from "@/components/blocks/BlockPreview"
 import { toast } from "sonner"
 
 interface EmailComponent {
   id: string
-  type: 'text' | 'image'
+  type: 'text' | 'image' | 'block'
   content: string
   styles: {
     fontSize?: string
@@ -23,6 +26,9 @@ interface EmailComponent {
     height?: string
   }
   order: number
+  // Block-specific properties
+  blockId?: string
+  blockData?: Block & { items: BlockItem[] }
 }
 
 
@@ -33,15 +39,18 @@ function EditorContent() {
   const [components, setComponents] = useState<EmailComponent[]>([])
   const [selectedComponent, setSelectedComponent] = useState<EmailComponent | null>(null)
   const [templateName, setTemplateName] = useState("")
-  const [draggedType, setDraggedType] = useState<'text' | 'image' | null>(null)
+  const [draggedType, setDraggedType] = useState<'text' | 'image' | 'block' | null>(null)
+  const [draggedBlock, setDraggedBlock] = useState<Block & { items: BlockItem[] } | null>(null)
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
   const [currentProject, setCurrentProject] = useState<Project | null>(null)
+  const [showBlockSelector, setShowBlockSelector] = useState(false)
   const canvasRef = useRef<HTMLDivElement>(null)
 
   // Component templates
   const componentTypes = [
     { type: 'text' as const, label: 'Text Block', icon: '📝' },
-    { type: 'image' as const, label: 'Image', icon: '🖼️' }
+    { type: 'image' as const, label: 'Image', icon: '🖼️' },
+    { type: 'block' as const, label: 'Global Block', icon: '🧩' }
   ]
 
   // Generate unique ID
@@ -136,8 +145,25 @@ function EditorContent() {
   }
 
   // Handle drag start from sidebar
-  const handleDragStart = (type: 'text' | 'image') => {
+  const handleDragStart = (type: 'text' | 'image' | 'block') => {
+    if (type === 'block') {
+      setShowBlockSelector(true)
+      return
+    }
     setDraggedType(type)
+  }
+
+  // Handle block selection for drag
+  const handleBlockSelect = (block: Block & { items: BlockItem[] }) => {
+    setDraggedBlock(block)
+    setDraggedType('block')
+    setShowBlockSelector(false)
+  }
+
+  // Handle block drag start
+  const handleBlockDragStart = (block: Block & { items: BlockItem[] }) => {
+    setDraggedBlock(block)
+    setDraggedType('block')
   }
 
   // Handle drop on canvas
@@ -146,7 +172,7 @@ function EditorContent() {
     if (!draggedType || !canvasRef.current) return
     
     // Type guard to ensure draggedType is properly typed
-    const componentType: 'text' | 'image' = draggedType
+    const componentType: 'text' | 'image' | 'block' = draggedType
 
     const rect = canvasRef.current.getBoundingClientRect()
     const y = e.clientY - rect.top
@@ -158,7 +184,9 @@ function EditorContent() {
     // Calculate cumulative heights to determine insertion point
     let cumulativeHeight = 20 // Initial padding
     for (let i = 0; i < sortedComponents.length; i++) {
-      const componentHeight = sortedComponents[i].type === 'text' ? 60 : 120 // Approximate heights
+      const componentHeight = sortedComponents[i].type === 'text' ? 60 : 
+                             sortedComponents[i].type === 'image' ? 120 : 
+                             200 // Block components are taller
       if (y < cumulativeHeight + componentHeight / 2) {
         insertOrder = i
         break
@@ -188,17 +216,32 @@ function EditorContent() {
       baseStyles.textAlign = 'left'
     }
 
-    const newComponent: EmailComponent = {
-      id: generateId(),
-      type: componentType,
-      content: componentType === 'text' ? 'Click to edit text' : 'https://media-cdn.tripadvisor.com/media/photo-s/21/f4/4b/8f/the-kingsbury-hotel.jpg',
-      styles: baseStyles,
-      order: insertOrder
+    let newComponent: EmailComponent
+
+    if (componentType === 'block' && draggedBlock) {
+      newComponent = {
+        id: generateId(),
+        type: 'block',
+        content: draggedBlock.name,
+        styles: baseStyles,
+        order: insertOrder,
+        blockId: draggedBlock.id,
+        blockData: draggedBlock
+      }
+    } else {
+      newComponent = {
+        id: generateId(),
+        type: componentType as 'text' | 'image',
+        content: componentType === 'text' ? 'Click to edit text' : 'https://media-cdn.tripadvisor.com/media/photo-s/21/f4/4b/8f/the-kingsbury-hotel.jpg',
+        styles: baseStyles,
+        order: insertOrder
+      }
     }
 
     setComponents([...updatedComponents, newComponent])
     setDraggedType(null)
-  }, [draggedType, components, currentProject])
+    setDraggedBlock(null)
+  }, [draggedType, draggedBlock, components, currentProject])
 
   // Handle canvas drag over
   const handleCanvasDragOver = (e: React.DragEvent) => {
@@ -366,12 +409,16 @@ function EditorContent() {
             {componentTypes.map((type) => (
               <div
                 key={type.type}
-                draggable
-                onDragStart={() => handleDragStart(type.type)}
-                className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-grab hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                draggable={type.type !== 'block'}
+                onDragStart={() => type.type !== 'block' && handleDragStart(type.type)}
+                onClick={() => type.type === 'block' && handleDragStart(type.type)}
+                className={`p-3 border border-gray-200 dark:border-gray-600 rounded-lg ${type.type === 'block' ? 'cursor-pointer' : 'cursor-grab'} hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2`}
               >
                 <span className="text-xl">{type.icon}</span>
                 <span className="text-sm font-medium">{type.label}</span>
+                {type.type === 'block' && (
+                  <Grid3X3 className="h-4 w-4 ml-auto" />
+                )}
               </div>
             ))}
           </div>
@@ -392,6 +439,14 @@ function EditorContent() {
             {currentTemplateId ? 'Update Template' : 'Save Template'}
           </Button>
         </div>
+
+        {/* Block Selector */}
+        <BlockSelector
+          isOpen={showBlockSelector}
+          onClose={() => setShowBlockSelector(false)}
+          onBlockSelect={handleBlockSelect}
+          onBlockDragStart={handleBlockDragStart}
+        />
       </div>
 
       {/* Main Canvas Area */}
@@ -486,7 +541,7 @@ function EditorContent() {
                         >
                           {component.content}
                         </div>
-                      ) : (
+                      ) : component.type === 'image' ? (
                         <div className="w-full bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden">
                           <img
                             src={component.content}
@@ -497,7 +552,19 @@ function EditorContent() {
                             }}
                           />
                         </div>
-                      )}
+                      ) : component.type === 'block' && component.blockData ? (
+                        <div className="w-full bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 flex items-center gap-1">
+                            <Grid3X3 className="h-3 w-3" />
+                            Block: {component.blockData.name}
+                          </div>
+                          <BlockPreview
+                            block={component.blockData}
+                            interactive={false}
+                            className="border-0"
+                          />
+                        </div>
+                      ) : null}
                     </div>
                   ))
                 }
@@ -513,24 +580,45 @@ function EditorContent() {
         
         {selectedComponent ? (
           <div className="space-y-4">
-            <div>
-              <Label>Content</Label>
-              {selectedComponent.type === 'text' ? (
-                <Textarea
-                  value={selectedComponent.content}
-                  onChange={(e) => updateComponentContent(selectedComponent.id, e.target.value)}
-                  className="mt-1"
-                  rows={3}
-                />
-              ) : (
-                <Input
-                  value={selectedComponent.content}
-                  onChange={(e) => updateComponentContent(selectedComponent.id, e.target.value)}
-                  placeholder="Image URL"
-                  className="mt-1"
-                />
-              )}
-            </div>
+            {selectedComponent.type === 'block' ? (
+              <div>
+                <Label>Block Information</Label>
+                <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Grid3X3 className="h-4 w-4" />
+                    <span className="font-medium">{selectedComponent.blockData?.name}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {selectedComponent.blockData?.description || 'No description'}
+                  </p>
+                  <div className="mt-2 text-xs text-gray-500">
+                    {selectedComponent.blockData?.structure?.rows?.length || 0} rows • {selectedComponent.blockData?.items?.length || 0} items
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  To edit this block's content, go to the Block Management page.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <Label>Content</Label>
+                {selectedComponent.type === 'text' ? (
+                  <Textarea
+                    value={selectedComponent.content}
+                    onChange={(e) => updateComponentContent(selectedComponent.id, e.target.value)}
+                    className="mt-1"
+                    rows={3}
+                  />
+                ) : (
+                  <Input
+                    value={selectedComponent.content}
+                    onChange={(e) => updateComponentContent(selectedComponent.id, e.target.value)}
+                    placeholder="Image URL"
+                    className="mt-1"
+                  />
+                )}
+              </div>
+            )}
 
             {selectedComponent.type === 'text' && (
               <>

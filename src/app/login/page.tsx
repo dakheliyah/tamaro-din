@@ -33,7 +33,7 @@ export default function LoginPage() {
         // Store authentication status in localStorage
         localStorage.setItem('isAuthenticated', 'true')
         localStorage.setItem('userEmail', data.user.email || '')
-        router.push('/dashboard')
+        router.push('/')
       }
     } catch (err) {
       setError("An unexpected error occurred")
