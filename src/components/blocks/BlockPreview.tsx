@@ -42,21 +42,42 @@ export function BlockPreview({
       )}
       
       <CardContent className="p-4">
-        <div className="space-y-3">
-          {block.structure.rows.map((row, rowIndex) => (
-            <div key={rowIndex} className="">
+        <div className="space-y-0">
+          {block.structure.rows.map((row, rowIndex) => {
+            const rowPadding = row.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+            
+            return (
               <div 
-                className={`grid gap-3`}
-                style={{ gridTemplateColumns: `repeat(${row.columns}, 1fr)` }}
+                key={rowIndex} 
+                className="grid gap-0"
+                style={{ 
+                  gridTemplateColumns: `repeat(${row.columns}, 1fr)`,
+                  padding: `${rowPadding.top}px ${rowPadding.right}px ${rowPadding.bottom}px ${rowPadding.left}px`
+                }}
               >
                 {Array.from({ length: row.columns }).map((_, columnIndex) => {
                   const cellItems = getItemsInCell(rowIndex, columnIndex)
+                  const columnSettings = row.columnSettings?.[columnIndex] || {
+                    horizontalAlign: 'left',
+                    verticalAlign: 'top',
+                    padding: { top: 0, right: 0, bottom: 0, left: 0 }
+                  }
+                  
+                  const columnPadding = columnSettings.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+                  const justifyContent = columnSettings.verticalAlign === 'top' ? 'flex-start' : 
+                                       columnSettings.verticalAlign === 'center' ? 'center' : 'flex-end'
+                  const alignItems = columnSettings.horizontalAlign === 'left' ? 'flex-start' : 
+                                   columnSettings.horizontalAlign === 'center' ? 'center' : 'flex-end'
                   
                   return (
                     <div
                       key={columnIndex}
-                      className="min-h-12 rounded border border-gray-200 dark:border-gray-700 p-2"
-                      style={{ textAlign: row.alignment }}
+                      className="min-h-12 rounded border border-gray-200 dark:border-gray-700 flex flex-col"
+                      style={{ 
+                        justifyContent,
+                        alignItems,
+                        padding: `${columnPadding.top}px ${columnPadding.right}px ${columnPadding.bottom}px ${columnPadding.left}px`
+                      }}
                     >
                       {cellItems.length === 0 ? (
                         <div className="text-center text-gray-400 dark:text-gray-500 text-xs py-2">
@@ -114,8 +135,8 @@ export function BlockPreview({
                   )
                 })}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </CardContent>
     </Card>

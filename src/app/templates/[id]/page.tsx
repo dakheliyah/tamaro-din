@@ -110,7 +110,46 @@ function TemplateViewContent() {
         html += `    <div style="margin-bottom: 16px; width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
       <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #6b7280;">${component.blockData.name}</h4>
 `
-        if (component.blockData.items && component.blockData.items.length > 0) {
+        if (component.blockData.structure && component.blockData.structure.rows) {
+          // Render with new structure
+          component.blockData.structure.rows.forEach((row, rowIndex) => {
+            const rowPadding = row.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+            html += `      <div style="display: grid; grid-template-columns: repeat(${row.columns}, 1fr); gap: 0px; padding: ${rowPadding.top}px ${rowPadding.right}px ${rowPadding.bottom}px ${rowPadding.left}px;">\n`
+            
+            for (let colIndex = 0; colIndex < row.columns; colIndex++) {
+              const columnSettings = row.columnSettings?.[colIndex] || {
+                horizontalAlign: 'left',
+                verticalAlign: 'top',
+                padding: { top: 0, right: 0, bottom: 0, left: 0 }
+              }
+              
+              const columnPadding = columnSettings.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+              const justifyContent = columnSettings.verticalAlign === 'top' ? 'flex-start' : 
+                                   columnSettings.verticalAlign === 'center' ? 'center' : 'flex-end'
+              const alignItems = columnSettings.horizontalAlign === 'left' ? 'flex-start' : 
+                               columnSettings.horizontalAlign === 'center' ? 'center' : 'flex-end'
+              
+              html += `        <div style="display: flex; flex-direction: column; justify-content: ${justifyContent}; align-items: ${alignItems}; padding: ${columnPadding.top}px ${columnPadding.right}px ${columnPadding.bottom}px ${columnPadding.left}px; min-height: 40px;">\n`
+              
+              const cellItems = component.blockData?.items?.filter(
+                item => item.row_index === rowIndex && item.column_index === colIndex
+              ) || []
+              
+              cellItems.forEach(item => {
+                if (item.type === 'text') {
+                  html += `          <div style="margin-bottom: 8px; font-size: ${item.styles?.fontSize || '16px'}; color: ${item.styles?.color || '#000000'}; text-align: ${item.styles?.textAlign || 'left'}; width: 100%;">${item.content}</div>\n`
+                } else if (item.type === 'image') {
+                  html += `          <div style="margin-bottom: 8px; text-align: center; width: 100%;"><img src="${item.content}" alt="Block Image" style="max-width: 100%; height: auto; border-radius: 4px;" /></div>\n`
+                }
+              })
+              
+              html += `        </div>\n`
+            }
+            
+            html += `      </div>\n`
+          })
+        } else if (component.blockData.items && component.blockData.items.length > 0) {
+          // Fallback to old structure
           component.blockData.items.forEach(item => {
             if (item.type === 'text') {
               html += `      <div style="margin-bottom: 8px; font-size: ${item.styles?.fontSize || '16px'}; color: ${item.styles?.color || '#000000'}; text-align: ${item.styles?.textAlign || 'left'};">${item.content}</div>\n`
@@ -322,10 +361,86 @@ function TemplateViewContent() {
                             </div>
                           ) : component.type === "block" && component.blockData ? (
                             <div className="w-full border border-gray-200 rounded-lg p-4 bg-gray-50">
-                              <div className="text-sm font-semibold text-gray-600 mb-3">
-                                🧩 {component.blockData.name}
-                              </div>
-                              {component.blockData.items && component.blockData.items.length > 0 ? (
+                              {component.blockData.structure && component.blockData.structure.rows ? (
+                                <div className="space-y-0">
+                                  {component.blockData.structure.rows.map((row, rowIndex) => {
+                                    const rowPadding = row.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+                                    const rowStyle = {
+                                      display: 'grid',
+                                      gridTemplateColumns: `repeat(${row.columns}, 1fr)`,
+                                      gap: '0px',
+                                      paddingTop: `${rowPadding.top}px`,
+                                      paddingRight: `${rowPadding.right}px`,
+                                      paddingBottom: `${rowPadding.bottom}px`,
+                                      paddingLeft: `${rowPadding.left}px`
+                                    }
+                                    
+                                    return (
+                                      <div key={rowIndex} style={rowStyle}>
+                                        {Array.from({ length: row.columns }, (_, colIndex) => {
+                                          const columnSettings = row.columnSettings?.[colIndex] || {
+                                            horizontalAlign: 'left',
+                                            verticalAlign: 'top',
+                                            padding: { top: 0, right: 0, bottom: 0, left: 0 }
+                                          }
+                                          
+                                          const columnPadding = columnSettings.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+                                          const columnStyle = {
+                                            display: 'flex',
+                                            flexDirection: 'column' as const,
+                                            justifyContent: columnSettings.verticalAlign === 'top' ? 'flex-start' : 
+                                                          columnSettings.verticalAlign === 'center' ? 'center' : 'flex-end',
+                                            alignItems: columnSettings.horizontalAlign === 'left' ? 'flex-start' : 
+                                                       columnSettings.horizontalAlign === 'center' ? 'center' : 'flex-end',
+                                            paddingTop: `${columnPadding.top}px`,
+                                            paddingRight: `${columnPadding.right}px`,
+                                            paddingBottom: `${columnPadding.bottom}px`,
+                                            paddingLeft: `${columnPadding.left}px`,
+                                            minHeight: '40px'
+                                          }
+                                          
+                                          const cellItems = component.blockData?.items?.filter(
+                                            item => item.row_index === rowIndex && item.column_index === colIndex
+                                          ) || []
+                                          
+                                          return (
+                                            <div key={colIndex} style={columnStyle}>
+                                              {cellItems.map((item, itemIndex) => (
+                                                <div key={itemIndex} className="w-full">
+                                                  {item.type === 'text' ? (
+                                                    <div
+                                                      style={{
+                                                        fontSize: item.styles?.fontSize || "16px",
+                                                        color: item.styles?.color || "#000000",
+                                                        textAlign: (item.styles?.textAlign as any) || "left",
+                                                        width: '100%'
+                                                      }}
+                                                    >
+                                                      {item.content}
+                                                    </div>
+                                                  ) : (
+                                                    <div className="text-center w-full">
+                                                      <img
+                                                        src={item.content}
+                                                        alt="Block Image"
+                                                        style={{
+                                                          maxWidth: "100%",
+                                                          height: "auto",
+                                                          borderRadius: "4px"
+                                                        }}
+                                                      />
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )
+                                        })}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              ) : component.blockData.items && component.blockData.items.length > 0 ? (
                                 <div className="space-y-2">
                                   {component.blockData.items.map((item, itemIndex) => (
                                     <div key={itemIndex}>

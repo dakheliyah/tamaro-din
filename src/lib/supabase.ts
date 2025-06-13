@@ -65,6 +65,22 @@ export interface Block {
     rows: Array<{
       columns: number
       alignment: 'left' | 'center' | 'right'
+      padding?: {
+        top: number
+        right: number
+        bottom: number
+        left: number
+      }
+      columnSettings?: Array<{
+        horizontalAlign: 'left' | 'center' | 'right'
+        verticalAlign: 'top' | 'center' | 'bottom'
+        padding?: {
+          top: number
+          right: number
+          bottom: number
+          left: number
+        }
+      }>
     }>
   }
   created_at: string
